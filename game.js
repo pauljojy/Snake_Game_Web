@@ -213,16 +213,21 @@ function gameOver() {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
         ctx.fillRect(0, 0, GAME_SIZE, GAME_SIZE);
         
+        // Calculate responsive font sizes based on game size
+        const gameSizeRatio = GAME_SIZE / 600; // Changed from 800 to 600 for medium text
+        const gameOverSize = Math.min(40 * gameSizeRatio, 40); // Changed from 32 to 40
+        const scoreSize = Math.min(20 * gameSizeRatio, 20); // Changed from 16 to 20
+        
         ctx.fillStyle = '#f00';  // Keep UI in Galaga theme
-        ctx.font = '48px "Press Start 2P"';
+        ctx.font = `${gameOverSize}px "Press Start 2P"`;
         ctx.textAlign = 'center';
         ctx.shadowColor = '#00f';
         ctx.shadowBlur = 10;
         ctx.fillText('GAME OVER', GAME_SIZE/2, GAME_SIZE/2);
         
-        ctx.font = '24px "Press Start 2P"';
-        ctx.fillText(`SCORE: ${score}`, GAME_SIZE/2, GAME_SIZE/2 + 60);
-        ctx.fillText('PRESS SPACE', GAME_SIZE/2, GAME_SIZE/2 + 100);
+        ctx.font = `${scoreSize}px "Press Start 2P"`;
+        ctx.fillText(`SCORE: ${score}`, GAME_SIZE/2, GAME_SIZE/2 + gameOverSize + 10);
+        ctx.fillText('PRESS SPACE', GAME_SIZE/2, GAME_SIZE/2 + gameOverSize + scoreSize + 20);
         
         // Reset shadow
         ctx.shadowBlur = 0;
@@ -339,16 +344,20 @@ function showPauseMenu() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
     ctx.fillRect(0, 0, GAME_SIZE, GAME_SIZE);
     
+    const gameSizeRatio = GAME_SIZE / 600; // Changed from 800 to 600
+    const pauseSize = Math.min(40 * gameSizeRatio, 40); // Changed from 32 to 40
+    const buttonTextSize = Math.min(20 * gameSizeRatio, 20); // Changed from 16 to 20
+    
     ctx.fillStyle = '#f00';
-    ctx.font = '48px "Press Start 2P"';
+    ctx.font = `${pauseSize}px "Press Start 2P"`;
     ctx.textAlign = 'center';
     ctx.shadowColor = '#00f';
     ctx.shadowBlur = 10;
-    ctx.fillText('PAUSED', GAME_SIZE/2, GAME_SIZE/2 - 50);
+    ctx.fillText('PAUSED', GAME_SIZE/2, GAME_SIZE/2 - pauseSize);
     
     // Draw resume button
-    const buttonWidth = 200;
-    const buttonHeight = 50;
+    const buttonWidth = Math.min(180, GAME_SIZE * 0.45); // Changed from 160 to 180
+    const buttonHeight = Math.min(45, GAME_SIZE * 0.11); // Changed from 40 to 45
     const buttonX = GAME_SIZE/2 - buttonWidth/2;
     const buttonY = GAME_SIZE/2 + 20;
     
@@ -358,9 +367,9 @@ function showPauseMenu() {
     ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
     ctx.strokeRect(buttonX, buttonY, buttonWidth, buttonHeight);
     
-    ctx.font = '24px "Press Start 2P"';
+    ctx.font = `${buttonTextSize}px "Press Start 2P"`;
     ctx.fillStyle = '#f00';
-    ctx.fillText('RESUME', GAME_SIZE/2, buttonY + 35);
+    ctx.fillText('RESUME', GAME_SIZE/2, buttonY + buttonHeight/2 + buttonTextSize/3);
     
     // Add click handler for resume button
     canvas.addEventListener('click', handlePauseClick);
