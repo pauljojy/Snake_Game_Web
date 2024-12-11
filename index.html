@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Snake Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="homepage" class="page active">
+        <h1>Snake Game</h1>
+        <div class="high-score">High Score: <span id="highScoreValue">0</span></div>
+        <button id="newGameBtn">New Game</button>
+        <button id="highScoresBtn">High Scores</button>
+    </div>
+    
+    <div id="gameContainer" class="page game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div class="score">Score: <span id="scoreValue">0</span></div>
+        <div class="high-score">High Score: <span id="currentHighScore">0</span></div>
+    </div>
+
+    <div id="highScoresPage" class="page">
+        <h2>Top 10 High Scores</h2>
+        <div id="highScoresList"></div>
+        <button id="backToMenuBtn">Back to Menu</button>
+    </div>
+
+    <div id="nameInputModal" class="modal">
+        <div class="modal-content">
+            <h3>New High Score!</h3>
+            <p>Enter your name:</p>
+            <input type="text" id="playerNameInput" maxlength="20" placeholder="Your name">
+            <button id="submitScoreBtn">Submit</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html> 
