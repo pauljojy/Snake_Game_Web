@@ -201,4 +201,21 @@ canvas {
 
 .game-container.active {
     display: flex;
+}
+
+#highScoresPage h2 {
+    text-align: center;
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+    margin-top: 20px;
+    font-size: 24px; /* Default size for desktop */
+}
+
+@media (max-width: 768px) {
+    #highScoresPage h2 {
+        font-size: 18px; /* Smaller font size for mobile */
+        padding: 0 10px;
+        margin-top: 40px;
+    }
 } 
