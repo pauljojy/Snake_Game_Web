@@ -1,7 +1,5 @@
 # Snake_Game_Web
-A blast from the past. The well known snake game recreated using retro theme and also made to run it in web.
-
-A classic Snake game built with HTML5 Canvas, JavaScript, and CSS.
+A blast from the past. The well known snake game recreated using retro theme and built with HTML5 Canvas, JavaScript, and CSS.
 
 ## Features
 - Classic snake gameplay
