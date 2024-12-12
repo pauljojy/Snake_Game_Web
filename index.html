@@ -40,8 +40,17 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp } 
-        from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            query, 
+            orderBy, 
+            limit, 
+            getDocs, 
+            serverTimestamp,
+            deleteDoc  // Add this import
+        } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -67,6 +76,7 @@
         window.limit = limit;
         window.getDocs = getDocs;
         window.serverTimestamp = serverTimestamp;
+        window.deleteDoc = deleteDoc;  // Add this line
     </script>
     <script src="game.js"></script>
 </body>
