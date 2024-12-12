@@ -339,13 +339,31 @@ async function loadHighScores() {
 // Update addHighScore function
 async function addHighScore(score, name) {
     try {
-        // Add to Firebase
         const highScoresRef = collection(db, 'highScores');
+        
+        // First, get all scores ordered by score
+        const q = query(highScoresRef, orderBy('score', 'desc'));
+        const snapshot = await getDocs(q);
+        
+        // Add the new score
         await addDoc(highScoresRef, {
             name: name,
             score: score,
             timestamp: serverTimestamp()
         });
+        
+        // If we have more than 20 scores, delete the lowest ones
+        if (snapshot.size >= 20) {
+            // Get scores to delete (everything after top 20)
+            const scoresToDelete = snapshot.docs
+                .slice(19) // Keep first 19 scores, as we just added a new one
+                .map(doc => doc.ref);
+            
+            // Delete each score
+            for (const scoreRef of scoresToDelete) {
+                await deleteDoc(scoreRef);
+            }
+        }
         
         // Reload scores
         await loadHighScores();
