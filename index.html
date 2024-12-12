@@ -19,6 +19,7 @@
         <canvas id="gameCanvas"></canvas>
         <div class="score">Score: <span id="scoreValue">0</span></div>
         <div class="high-score">High Score: <span id="currentHighScore">0</span></div>
+        <button id="pauseBtn" class="pause-button">❚❚</button>
     </div>
 
     <div id="highScoresPage" class="page">
@@ -36,6 +37,37 @@
         </div>
     </div>
 
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp } 
+        from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCyMM4csZNJqBuOuly-8_8vfy0Q9OskgZQ",
+            authDomain: "snake-game-a4636.firebaseapp.com",
+            databaseURL: "https://snake-game-a4636-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "snake-game-a4636",
+            storageBucket: "snake-game-a4636.firebasestorage.app",
+            messagingSenderId: "206416396322",
+            appId: "1:206416396322:web:34d8e792c0afe078d84a7b"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase services available globally
+        window.db = db;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.query = query;
+        window.orderBy = orderBy;
+        window.limit = limit;
+        window.getDocs = getDocs;
+        window.serverTimestamp = serverTimestamp;
+    </script>
     <script src="game.js"></script>
 </body>
 </html> 
