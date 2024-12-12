@@ -27,7 +27,7 @@ let touchStartX = null;
 let touchStartY = null;
 
 // Add at the top with other variables
-let highScore = localStorage.getItem('snakeHighScore') || 0;
+let highScore = 0;
 document.getElementById('highScoreValue').textContent = highScore;
 document.getElementById('currentHighScore').textContent = highScore;
 
@@ -43,6 +43,9 @@ document.getElementById('backToMenuBtn').addEventListener('click', showHomePage)
 
 // Add at the top with other game variables
 let isPaused = false;
+
+// Add event listener for pause button
+document.getElementById('pauseBtn').addEventListener('click', togglePause);
 
 // Add to the keyboard event listener
 document.addEventListener('keydown', (e) => {
@@ -252,7 +255,6 @@ function gameOver() {
     // Update high score if necessary
     if (score > highScore) {
         highScore = score;
-        localStorage.setItem('snakeHighScore', highScore);
         document.getElementById('highScoreValue').textContent = highScore;
         document.getElementById('currentHighScore').textContent = highScore;
     }
@@ -303,28 +305,67 @@ function updateHighScoresList() {
     });
 }
 
-// Replace the localStorage operations with API calls
+// Update loadHighScores function
 async function loadHighScores() {
     try {
-        const response = await fetch('https://your-api.com/scores');
-        const scores = await response.json();
-        highScores = scores;
+        const highScoresRef = collection(db, 'highScores');
+        const q = query(highScoresRef, orderBy('score', 'desc'), limit(10));
+        const snapshot = await getDocs(q);
+        
+        highScores = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        
+        // Update the displayed high score if we have scores
+        if (highScores.length > 0) {
+            highScore = highScores[0].score;
+            document.getElementById('highScoreValue').textContent = highScore;
+            document.getElementById('currentHighScore').textContent = highScore;
+        }
+        
         updateHighScoresList();
     } catch (error) {
-        console.error('Failed to load high scores');
+        console.error('Failed to load high scores:', error);
+        // Fallback to local storage if Firebase fails
+        highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || [];
+        highScore = parseInt(localStorage.getItem('snakeHighScore')) || 0;
+        document.getElementById('highScoreValue').textContent = highScore;
+        document.getElementById('currentHighScore').textContent = highScore;
+        updateHighScoresList();
     }
 }
 
-// Revert back to the original localStorage version
-function addHighScore(score, name) {
-    highScores.push({ score, name });
-    highScores.sort((a, b) => b.score - a.score);
-    if (highScores.length > 10) {
-        highScores.pop();
+// Update addHighScore function
+async function addHighScore(score, name) {
+    try {
+        // Add to Firebase
+        const highScoresRef = collection(db, 'highScores');
+        await addDoc(highScoresRef, {
+            name: name,
+            score: score,
+            timestamp: serverTimestamp()
+        });
+        
+        // Reload scores
+        await loadHighScores();
+    } catch (error) {
+        console.error('Failed to save high score:', error);
+        // Fallback to local storage
+        highScores.push({ score, name });
+        highScores.sort((a, b) => b.score - a.score);
+        if (highScores.length > 10) {
+            highScores.pop();
+        }
+        localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
+        updateHighScoresList();
     }
-    localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
-    updateHighScoresList();
 }
+
+// Add initial load of high scores when game starts
+window.addEventListener('load', () => {
+    loadHighScores();
+});
 
 // Add pause/resume functions
 function togglePause() {
@@ -344,9 +385,9 @@ function showPauseMenu() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
     ctx.fillRect(0, 0, GAME_SIZE, GAME_SIZE);
     
-    const gameSizeRatio = GAME_SIZE / 600; // Changed from 800 to 600
-    const pauseSize = Math.min(40 * gameSizeRatio, 40); // Changed from 32 to 40
-    const buttonTextSize = Math.min(20 * gameSizeRatio, 20); // Changed from 16 to 20
+    const gameSizeRatio = GAME_SIZE / 600;
+    const pauseSize = Math.min(40 * gameSizeRatio, 40);
+    const buttonTextSize = Math.min(20 * gameSizeRatio, 20);
     
     ctx.fillStyle = '#f00';
     ctx.font = `${pauseSize}px "Press Start 2P"`;
@@ -356,24 +397,39 @@ function showPauseMenu() {
     ctx.fillText('PAUSED', GAME_SIZE/2, GAME_SIZE/2 - pauseSize);
     
     // Draw resume button
-    const buttonWidth = Math.min(180, GAME_SIZE * 0.45); // Changed from 160 to 180
-    const buttonHeight = Math.min(45, GAME_SIZE * 0.11); // Changed from 40 to 45
-    const buttonX = GAME_SIZE/2 - buttonWidth/2;
-    const buttonY = GAME_SIZE/2 + 20;
+    const buttonWidth = Math.min(180, GAME_SIZE * 0.45);
+    const buttonHeight = Math.min(45, GAME_SIZE * 0.11);
+    const buttonSpacing = buttonHeight + 30;
     
+    // Resume button
+    const resumeY = GAME_SIZE/2 + 20;
+    drawPauseButton('RESUME', GAME_SIZE/2, resumeY, buttonWidth, buttonHeight, buttonTextSize);
+    
+    // Menu button
+    const menuY = resumeY + buttonSpacing;
+    drawPauseButton('MENU', GAME_SIZE/2, menuY, buttonWidth, buttonHeight, buttonTextSize);
+    
+    // Add click handlers
+    canvas.addEventListener('click', handlePauseClick);
+    canvas.addEventListener('touchend', handlePauseClick);
+}
+
+function drawPauseButton(text, x, y, width, height, fontSize) {
+    const buttonX = x - width/2;
+    
+    // Draw button background and border
     ctx.fillStyle = '#000';
     ctx.strokeStyle = '#00f';
     ctx.lineWidth = 3;
-    ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
-    ctx.strokeRect(buttonX, buttonY, buttonWidth, buttonHeight);
+    ctx.fillRect(buttonX, y, width, height);
+    ctx.strokeRect(buttonX, y, width, height);
     
-    ctx.font = `${buttonTextSize}px "Press Start 2P"`;
+    // Center text in button
+    ctx.font = `${fontSize}px "Press Start 2P"`;
     ctx.fillStyle = '#f00';
-    ctx.fillText('RESUME', GAME_SIZE/2, buttonY + buttonHeight/2 + buttonTextSize/3);
-    
-    // Add click handler for resume button
-    canvas.addEventListener('click', handlePauseClick);
-    canvas.addEventListener('touchend', handlePauseClick);
+    ctx.textAlign = 'center';  // Ensure text is centered
+    ctx.textBaseline = 'middle';  // Align text vertically
+    ctx.fillText(text, x, y + height/2);  // Position text in center of button
 }
 
 function handlePauseClick(e) {
@@ -384,17 +440,30 @@ function handlePauseClick(e) {
     const clickX = (e.type === 'click' ? e.clientX : e.changedTouches[0].clientX) - rect.left;
     const clickY = (e.type === 'click' ? e.clientY : e.changedTouches[0].clientY) - rect.top;
     
-    const buttonWidth = 200;
-    const buttonHeight = 50;
-    const buttonX = GAME_SIZE/2 - buttonWidth/2;
-    const buttonY = GAME_SIZE/2 + 20;
+    const buttonWidth = Math.min(180, GAME_SIZE * 0.45);
+    const buttonHeight = Math.min(45, GAME_SIZE * 0.11);
+    const buttonSpacing = buttonHeight + 30;
+    
+    const resumeY = GAME_SIZE/2 + 20;
+    const menuY = resumeY + buttonSpacing;
     
     const scaledX = clickX * scale;
     const scaledY = clickY * scale;
     
+    const buttonX = GAME_SIZE/2 - buttonWidth/2;
+    
+    // Check resume button
     if (scaledX >= buttonX && scaledX <= buttonX + buttonWidth &&
-        scaledY >= buttonY && scaledY <= buttonY + buttonHeight) {
+        scaledY >= resumeY && scaledY <= resumeY + buttonHeight) {
         togglePause();
+    }
+    // Check menu button
+    else if (scaledX >= buttonX && scaledX <= buttonX + buttonWidth &&
+             scaledY >= menuY && scaledY <= menuY + buttonHeight) {
+        isPaused = false;
+        hidePauseMenu();
+        clearInterval(gameLoop);
+        showHomePage();
     }
 }
 
